@@ -1,12 +1,25 @@
+import { Layout } from "@/components/layout";
+import { ModeToggle } from "@/theme/ModeToggle";
+import Image from "next/image";
 import { LoggedInButton } from "../auth/LoggedInButton";
 
 export const Headers = async () => {
   return (
-    <div className="flex items-center gap-4">
-      <h1 className="font-bold text-lg">
-        {/* <Image src="/icon-title.png" width={64} alt="icon page" /> */}
-      </h1>
-      <LoggedInButton />
-    </div>
+    <header className="w-full border-b border-border py-1">
+      <Layout className="flex items-center gap-4">
+        <div className="flex-1">
+          <Image
+            src="/icon.png"
+            width={32}
+            height={32}
+            alt="trusty-reviews logo"
+          ></Image>
+        </div>
+        <div className="flex items-center gap-2">
+          <ModeToggle />
+          <LoggedInButton />
+        </div>
+      </Layout>
+    </header>
   );
 };

@@ -1,5 +1,10 @@
+import { Layout } from "@/components/layout";
 import type { PageParams } from "@/types/next";
 
 export default async function RoutePage(props: PageParams<{}>) {
-  return <p>Hello World</p>;
+  return (
+    <Layout>
+      <p>Hello World</p>
+    </Layout>
+  );
 }

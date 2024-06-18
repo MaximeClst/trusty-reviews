@@ -1,13 +1,14 @@
-("");
+"use client";
 
-import { signOut } from "@/auth/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LogOut } from "lucide-react";
 import { PropsWithChildren } from "react";
+import { signOutAction } from "./auth.action";
 
 export type LoggedInDropdownProps = PropsWithChildren;
 
@@ -17,15 +18,13 @@ export const LoggedInDropdown = (props: LoggedInDropdownProps) => {
       <DropdownMenuTrigger asChild>{props.children}</DropdownMenuTrigger>
       <DropdownMenuContent>
         <form>
-          <DropdownMenuItem asChild>
-            <button
-              formAction={async () => {
-                "use server";
-                await signOut();
-              }}
-            >
-              Logout
-            </button>
+          <DropdownMenuItem
+            onClick={() => {
+              signOutAction();
+            }}
+          >
+            <LogOut size={16} className="mr-2" />
+            Logout
           </DropdownMenuItem>
         </form>
       </DropdownMenuContent>

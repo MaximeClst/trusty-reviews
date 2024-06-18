@@ -2,65 +2,69 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 generator client {
   provider = "prisma-client-js"
 }
- 
+
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
-  accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
-  Authenticator Authenticator[]
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  plan          Plan      @default(FREE)
+
+  accounts Account[]
+  sessions Session[]
+  Product  Product[]
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 }
- 
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+
 model Account {
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
   id_token          String?
   session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
+
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
@@ -71,8 +75,24 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
+  // user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([userId, credentialID])
+}
+
+model Product {
+  id              String  @id @default(cuid())
+  name            String
+  noteText        String?
+  informationText String?
+  reviewText      String?
+  thanksText      String?
+  backgroundColor String?
+
+  user            User    @relation(fields: [userId], references: [id] onDelete: Cascade)
+  userId String
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 }

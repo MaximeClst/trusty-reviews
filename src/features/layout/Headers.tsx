@@ -6,7 +6,7 @@ import { LoggedInButton } from "../auth/LoggedInButton";
 export const Headers = async () => {
   return (
     <header className="w-full border-b border-border py-1">
-      <Layout className="flex items-center gap-4">
+      <Layout className="flex items-center flex-row py-0 gap-4">
         <div className="flex-1">
           <Image
             src="/icon.png"

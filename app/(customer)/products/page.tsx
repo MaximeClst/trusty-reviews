@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/prisma";
 import { PageParams } from "@/types/next";
+import Link from "next/link";
 
 export default async function RoutePage(props: PageParams<{}>) {
   const user = await requiredCurrentUser();
@@ -25,18 +26,27 @@ export default async function RoutePage(props: PageParams<{}>) {
     <Layout>
       <LayoutTitle>Products</LayoutTitle>
       <Card className="p-4">
-        <Table>
-          <TableHeader>
-            <TableHead>Name</TableHead>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {products.length ? (
+          <Table>
+            <TableHeader>
+              <TableHead>Name</TableHead>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>{product.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Link
+            href="/products/new"
+            className="hover:bg-accent/40 transition-color border-2 border-dashed border-primary p-8 lg-p-12 w-full flex items-center justify-center rounded-md"
+          >
+            Create Product
+          </Link>
+        )}
       </Card>
     </Layout>
   );

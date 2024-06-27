@@ -1,3 +1,4 @@
+import { authMiddleware } from "@/middleware/authMiddleware";
 import { createSafeActionClient } from "next-safe-action";
 
 class ActionError extends Error {
@@ -14,6 +15,15 @@ const handleReturnedServerError = (error: Error) => {
   return "An unexpected error occurred";
 };
 
-export const action = createSafeActionClient({
+const actionClient = createSafeActionClient({
   handleReturnedServerError: handleReturnedServerError,
 });
+
+export const userAction = async () => {
+  const context = await authMiddleware(); // Vérifie l'utilisateur
+  // Utilisez actionClient avec les informations utilisateur obtenues
+  return {
+    ...actionClient,
+    user: context.user,
+  };
+};

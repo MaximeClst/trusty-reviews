@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { createProductAction } from "./product.action";
 import { GRADIENT_CLASSES, ProductSchema, ProductType } from "./product.schema";
 
 export type ProductFormProps = {
@@ -34,6 +37,17 @@ export const ProductForm = (props: ProductFormProps) => {
   });
 
   const isCreate = !Boolean(props.defaultValues);
+
+  const mutation = useMutation({
+    mutationFn: async (values: ProductType) => {
+      const { data, serverError } = await createProductAction(values);
+
+      if (serverError) {
+        toast.error(serverError);
+        return;
+      }
+    },
+  });
 
   return (
     <Card>

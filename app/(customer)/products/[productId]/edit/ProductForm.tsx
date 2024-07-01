@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createProductAction } from "./product.action";
 import { GRADIENT_CLASSES, ProductSchema, ProductType } from "./product.schema";
@@ -37,15 +38,19 @@ export const ProductForm = (props: ProductFormProps) => {
   });
 
   const isCreate = !Boolean(props.defaultValues);
+  const router = useRouter();
 
   const mutation = useMutation({
     mutationFn: async (values: ProductType) => {
       const { data, serverError } = await createProductAction(values);
 
-      if (serverError) {
+      if (serverError || !data) {
         toast.error(serverError);
         return;
       }
+
+      toast.success("Product created");
+      router.push(`/products/${data.id}`);
     },
   });
 
@@ -63,7 +68,7 @@ export const ProductForm = (props: ProductFormProps) => {
           className="flex flex-col gap-4"
           form={form}
           onSubmit={async (values) => {
-            console.log(values);
+            await mutation.mutateAsync(values);
           }}
         >
           <FormField
@@ -76,7 +81,7 @@ export const ProductForm = (props: ProductFormProps) => {
                   <Input placeholder="iPhone 15" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your public display name.
+                  The name of the public review.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -89,7 +94,10 @@ export const ProductForm = (props: ProductFormProps) => {
               <FormItem>
                 <FormLabel>Background color</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger>
                       <SelectValue></SelectValue>
                     </SelectTrigger>

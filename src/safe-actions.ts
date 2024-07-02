@@ -1,7 +1,7 @@
 import { createSafeActionClient } from "next-safe-action";
 import { currentUser } from "./auth/current-user";
 
-class ActionError extends Error {
+export class ActionError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ActionError";
@@ -12,12 +12,8 @@ const handleReturnedServerError = (error: Error) => {
   if (error instanceof ActionError) {
     return error.message;
   }
-  return "An unexpected error occured";
+  return "An unexpected error occurred";
 };
-
-export const action = createSafeActionClient({
-  handleReturnedServerError: handleReturnedServerError,
-});
 
 const authMiddleware = async () => {
   const user = await currentUser();
@@ -29,10 +25,19 @@ const authMiddleware = async () => {
   return user;
 };
 
-export const userAction = async <T>(
-  action: (context: { user: any }, ...args: any[]) => T,
-  ...args: any[]
-): Promise<T> => {
+const safeActionClient = createSafeActionClient({
+  handleReturnedServerError: handleReturnedServerError,
+});
+
+// Wrapper function to apply the middleware and validate input
+export const userAction = async <T, S>(
+  schema: S,
+  action: (input: T, context: { user: any }) => Promise<any>,
+  input: T
+): Promise<any> => {
   const user = await authMiddleware();
-  return action({ user }, ...args);
+  const validatedInput = (schema as any).parse(input); // Validate the input using the schema
+  return action(validatedInput, { user });
 };
+
+export const action = safeActionClient;

@@ -10,8 +10,8 @@ export const SignInButton = () => {
       <Button
         variant="secondary"
         size="sm"
-        onClick={async () => {
-          await signInAction();
+        onClick={() => {
+          signInAction();
         }}
       >
         <LogIn size={16} className="mr-2" />

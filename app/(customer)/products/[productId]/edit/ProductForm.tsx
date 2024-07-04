@@ -1,147 +1,6 @@
-// "use client";
-
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import {
-//   Form,
-//   FormControl,
-//   FormDescription,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-//   useZodForm,
-// } from "@/components/ui/form";
-// import { Input } from "@/components/ui/input";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import { cn } from "@/lib/utils";
-// import { useMutation } from "@tanstack/react-query";
-// import { useRouter } from "next/navigation";
-// import { toast } from "sonner";
-// import { createProductAction } from "./product.action";
-// import { GRADIENT_CLASSES, ProductSchema, ProductType } from "./product.schema";
-
-// export type ProductFormProps = {
-//   defaultValues?: ProductType;
-// };
-
-// export const ProductForm = (props: ProductFormProps) => {
-//   const form = useZodForm({
-//     schema: ProductSchema,
-//     defaultValues: props.defaultValues || {},
-//   });
-
-//   const isCreate = !Boolean(props.defaultValues);
-//   const router = useRouter();
-
-//   const mutation = useMutation({
-//     mutationFn: async (values: ProductType) => {
-//       console.log("Calling createProductionAction with values:", values);
-//       const { data, serverError } = await createProductAction(values);
-//       console.log("createProductAction response:", { data, serverError });
-//       if (serverError || !data) {
-//         toast.error(serverError);
-//         return;
-//       }
-
-//       toast.success("Product created");
-//       router.push(`/products/${data.id}`);
-//     },
-//   });
-
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle>
-//           {isCreate
-//             ? "Create Product"
-//             : `Edit product ${props.defaultValues?.name}`}
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent className="flex flex-col gap-4">
-//         <Form
-//           className="flex flex-col gap-4"
-//           form={form}
-//           onSubmit={async (values) => {
-//             console.log("Submitting values: ", values);
-//             await mutation.mutateAsync(values);
-//           }}
-//         >
-//           <FormField
-//             control={form.control}
-//             name="name"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>Username</FormLabel>
-//                 <FormControl>
-//                   <Input
-//                     placeholder="iPhone 15"
-//                     {...field}
-//                     defaultValue={field.value || ""}
-//                   />
-//                 </FormControl>
-//                 <FormDescription>
-//                   The name of the public review.
-//                 </FormDescription>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-//           <FormField
-//             control={form.control}
-//             name="backgroundColor"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>Background color</FormLabel>
-//                 <FormControl>
-//                   <Select
-//                     value={field.value || ""}
-//                     onValueChange={(value) => field.onChange(value)}
-//                   >
-//                     <SelectTrigger>
-//                       <SelectValue></SelectValue>
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                       {GRADIENT_CLASSES.map((gradient) => (
-//                         <SelectItem
-//                           value={gradient}
-//                           key={gradient}
-//                           className="flex"
-//                         >
-//                           <div
-//                             className={cn(
-//                               gradient,
-//                               "block w-80 h-8 rounded-md flex-1"
-//                             )}
-//                           ></div>
-//                         </SelectItem>
-//                       ))}
-//                     </SelectContent>
-//                   </Select>
-//                 </FormControl>
-//                 <FormDescription>
-//                   The review page background color
-//                 </FormDescription>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-//           <Button type="submit">
-//             {isCreate ? "Create prodct" : "Save product"}
-//           </Button>
-//         </Form>
-//       </CardContent>
-//     </Card>
-//   );
-// };
 "use client";
 
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -162,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { uploadImageAction } from "@/features/upload/upload.action";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -212,6 +72,22 @@ export const ProductForm = (props: ProductFormProps) => {
     },
   });
 
+  const submitImage = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.set("file", file);
+      const { data, serverError } = await uploadImageAction(formData);
+
+      if (!data || serverError) {
+        toast.error(serverError);
+        return;
+      }
+
+      const url = data.url;
+      form.setValue("image", url);
+    },
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -234,10 +110,57 @@ export const ProductForm = (props: ProductFormProps) => {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Product Name</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input placeholder="iPhone 15" {...field} />
                 </FormControl>
+                <FormDescription>
+                  The name of the public review.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Image</FormLabel>
+                <div className="flex items-center gap-2">
+                  <FormControl className="flex-1">
+                    <Input
+                      type="file"
+                      placeholder="iPhone 15"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+
+                        if (!file) {
+                          return;
+                        }
+
+                        //if file is bigger than 1mb
+                        if (file.size > 1024 * 1024) {
+                          toast.error("File is too big");
+                          return;
+                        }
+
+                        //if file is not png, jpg, jpeg
+                        if (!file.type.includes("image")) {
+                          toast.error("File is not an image");
+                          return;
+                        }
+
+                        submitImage.mutate(file);
+                      }}
+                    />
+                    {field.value ? (
+                      <Avatar>
+                        <AvatarImage src={field.value} />
+                      </Avatar>
+                    ) : null}
+                  </FormControl>
+                </div>
                 <FormDescription>
                   The name of the public review.
                 </FormDescription>

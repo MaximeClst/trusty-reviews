@@ -4,12 +4,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { env } from "./../env";
 
-export const {
-  handlers,
-  auth: baseAuth,
-  signIn,
-  signOut,
-} = NextAuth({
+const authOptions = {
   adapter: PrismaAdapter(prisma),
   theme: {
     logo: "/icon-title.png",
@@ -20,4 +15,12 @@ export const {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-});
+};
+export const {
+  handlers,
+  auth: baseAuth,
+  signIn,
+  signOut,
+} = NextAuth(authOptions);
+
+export { authOptions };

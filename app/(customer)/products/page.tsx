@@ -30,11 +30,15 @@ export default async function RoutePage(props: PageParams<{}>) {
           <Table>
             <TableHeader>
               <TableHead>Name</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Reviews</TableHead>
             </TableHeader>
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell>{product.name}</TableCell>
+                  <Link href={`/products/${product.id}`} key={product.id}>
+                    <TableCell>{product.name}</TableCell>
+                  </Link>
                 </TableRow>
               ))}
             </TableBody>
@@ -42,7 +46,7 @@ export default async function RoutePage(props: PageParams<{}>) {
         ) : (
           <Link
             href="/products/new"
-            className="hover:bg-accent/40 transition-color border-2 border-dashed border-primary p-8 lg-p-12 w-full flex items-center justify-center rounded-md"
+            className="flex w-full items-center justify-center rounded-md border-2 border-dashed border-primary p-8 transition-colors hover:bg-accent/40 lg:p-12"
           >
             Create Product
           </Link>

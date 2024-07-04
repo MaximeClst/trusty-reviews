@@ -166,24 +166,18 @@ import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createProductAction } from "./product.action";
+import { createProductAction, updateProductAction } from "./product.action";
 import { GRADIENT_CLASSES, ProductSchema, ProductType } from "./product.schema";
 
 export type ProductFormProps = {
   defaultValues?: ProductType;
+  productId?: string;
 };
 
 export const ProductForm = (props: ProductFormProps) => {
   const form = useZodForm({
     schema: ProductSchema,
-    defaultValues: props.defaultValues || {
-      name: "",
-      noteText: "",
-      informationText: "",
-      reviewText: "",
-      thanksText: "",
-      backgroundColor: "",
-    },
+    defaultValues: props.defaultValues,
   });
 
   const isCreate = !Boolean(props.defaultValues);
@@ -192,16 +186,19 @@ export const ProductForm = (props: ProductFormProps) => {
   const mutation = useMutation({
     mutationFn: async (values: ProductType) => {
       try {
-        console.log("Calling createProductionAction with values:", values);
-        const { data, serverError } = await createProductAction(values);
-        console.log("createProductAction response:", { data, serverError });
+        const { data, serverError } = isCreate
+          ? await createProductAction(values)
+          : await updateProductAction({
+              id: props.productId ?? "-",
+              data: values,
+            });
         if (serverError || !data) {
           toast.error(serverError);
           return;
         }
 
         toast.success("Product created");
-        router.push(`/products/${data.id}`);
+        router.push(`/products/new}`);
       } catch (error: any) {
         if (error.message === "Slug already exists") {
           form.setError("slug", {
@@ -229,7 +226,6 @@ export const ProductForm = (props: ProductFormProps) => {
           className="flex flex-col gap-4"
           form={form}
           onSubmit={async (values) => {
-            console.log("Submitting values: ", values);
             await mutation.mutateAsync(values);
           }}
         >
